@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nettverk overvåker</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+  <div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">🌐 Nettverk overvåker</h1>
+    <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
+      <thead>
+        <tr>
+          <th class="p-2">IP addresse</th>
+          <th class="p-2">Status</th>
+          <th class="p-2">Ventetid (ms)</th>
+        </tr>
+      </thead>
+      <tbody id="device-table-body">
+        {% for device in devices %}
+        <tr class="text-center {% if device.status == 'Online' %}bg-green-700{% else %}bg-red-700{% endif %}">
+          <td class="p-2">{{ device.ip }}</td>
+          <td class="p-2">{{ device.status }}</td>
+          <td class="p-2">{{ device.latency if device.latency else "N/A" }}</td>
+        </tr>
+        {% endfor %}
+<script>
+    async function fetchDevices() {
+        const res = await fetch('/api/devices');
+        const data = await res.json();
+        const tableBody = document.getElementById('device-table-body');
+        tableBody.innerHTML = '';
+
+        data.forEach(device => {
+            const row = document.createElement('tr');
+            row.className = `text-center ${device.status === 'Online' ? 'bg-green-900' : 'bg-red-900'}`;
+            row.innerHTML = `
+                <td class="p-2 border border-gray-700">${device.ip}</td> 
+                <td class="p-2 border border-gray-700">
+                    ${device.status === 'Online' ? '🟢 Online' : '🔴 Offline'}
+                </td>
+                <td class="p-2 border border-gray-700">${device.latency || 'N/A'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    fetchDevices();
+    setInterval(fetchDevices, 5000);
+</script>
+
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
